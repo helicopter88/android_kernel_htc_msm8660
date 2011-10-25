@@ -3779,6 +3779,7 @@ static struct clk_lookup msm_clocks_8x60[] = {
 	CLK_LOOKUP("mdp_pclk",		mdp_p_clk.c,		NULL),
 	CLK_LOOKUP("iface_clk",		mdp_p_clk.c,	"footswitch-8x60.4"),
 	CLK_LOOKUP("smmu_pclk",		smmu_p_clk.c,		NULL),
+	CLK_LOOKUP("iface_clk",		smmu_p_clk.c,	"msm_iommu"),
 	CLK_LOOKUP("iface_clk",		rot_p_clk.c,	"msm_rotator.0"),
 	CLK_LOOKUP("iface_clk",		rot_p_clk.c,	"footswitch-8x60.6"),
 	CLK_LOOKUP("tv_enc_pclk",	tv_enc_p_clk.c,		NULL),

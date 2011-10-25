@@ -208,3 +208,221 @@ struct clk_lookup msm_clocks_7x30[] = {
 
 unsigned msm_num_clocks_7x30 = ARRAY_SIZE(msm_clocks_7x30);
 
+#ifdef CONFIG_MSM_ROTATOR
+static struct resource resources_msm_rotator[] = {
+	{
+		.start	= 0xA3E00000,
+		.end	= 0xA3F00000 - 1,
+		.flags	= IORESOURCE_MEM,
+	},
+	{
+		.start	= INT_ROTATOR,
+		.end	= INT_ROTATOR,
+		.flags	= IORESOURCE_IRQ,
+	},
+};
+
+static struct msm_rot_clocks rotator_clocks[] = {
+	{
+		.clk_name = "core_clk",
+		.clk_type = ROTATOR_CORE_CLK,
+		.clk_rate = 0,
+	},
+	{
+		.clk_name = "iface_clk",
+		.clk_type = ROTATOR_PCLK,
+		.clk_rate = 0,
+	},
+	{
+		.clk_name = "mem_clk",
+		.clk_type = ROTATOR_IMEM_CLK,
+		.clk_rate = 0,
+	},
+};
+
+static struct msm_rotator_platform_data rotator_pdata = {
+	.number_of_clocks = ARRAY_SIZE(rotator_clocks),
+	.hardware_version_number = 0x1000303,
+	.rotator_clks = rotator_clocks,
+	.regulator_name = "fs_rot",
+};
+
+struct platform_device msm_rotator_device = {
+	.name		= "msm_rotator",
+	.id		= 0,
+	.num_resources  = ARRAY_SIZE(resources_msm_rotator),
+	.resource       = resources_msm_rotator,
+	.dev = {
+		.platform_data = &rotator_pdata,
+	},
+};
+#endif
+
+static void __init msm_register_device(struct platform_device *pdev, void *data)
+{
+	int ret;
+
+	pdev->dev.platform_data = data;
+
+	ret = platform_device_register(pdev);
+	if (ret)
+		dev_err(&pdev->dev,
+			  "%s: platform_device_register() failed = %d\n",
+			  __func__, ret);
+}
+
+void __init msm_fb_register_device(char *name, void *data)
+{
+	if (!strncmp(name, "mdp", 3))
+		msm_register_device(&msm_mdp_device, data);
+	else if (!strncmp(name, "pmdh", 4))
+		msm_register_device(&msm_mddi_device, data);
+	else if (!strncmp(name, "emdh", 4))
+		msm_register_device(&msm_mddi_ext_device, data);
+	else if (!strncmp(name, "ebi2", 4))
+		msm_register_device(&msm_ebi2_lcd_device, data);
+	else if (!strncmp(name, "tvenc", 5))
+		msm_register_device(&msm_tvenc_device, data);
+	else if (!strncmp(name, "lcdc", 4))
+		msm_register_device(&msm_lcdc_device, data);
+	else if (!strncmp(name, "dtv", 3))
+		msm_register_device(&msm_dtv_device, data);
+#ifdef CONFIG_FB_MSM_TVOUT
+	else if (!strncmp(name, "tvout_device", 12))
+		msm_register_device(&tvout_msm_device, data);
+#endif
+	else
+		printk(KERN_ERR "%s: unknown device! %s\n", __func__, name);
+}
+
+static struct platform_device msm_camera_device = {
+	.name	= "msm_camera",
+	.id	= 0,
+};
+
+void __init msm_camera_register_device(void *res, uint32_t num,
+	void *data)
+{
+	msm_camera_device.num_resources = num;
+	msm_camera_device.resource = res;
+
+	msm_register_device(&msm_camera_device, data);
+}
+
+struct resource kgsl_3d0_resources[] = {
+	{
+		.name  = KGSL_3D0_REG_MEMORY,
+		.start = 0xA3500000, /* 3D GRP address */
+		.end = 0xA351ffff,
+		.flags = IORESOURCE_MEM,
+	},
+	{
+		.name = KGSL_3D0_IRQ,
+		.start = INT_GRP_3D,
+		.end = INT_GRP_3D,
+		.flags = IORESOURCE_IRQ,
+	},
+};
+
+static struct kgsl_device_platform_data kgsl_3d0_pdata = {
+	.pwr_data = {
+		.pwrlevel = {
+			{
+				.gpu_freq = 245760000,
+				.bus_freq = 192000000,
+			},
+			{
+				.gpu_freq = 192000000,
+				.bus_freq = 152000000,
+			},
+			{
+				.gpu_freq = 192000000,
+				.bus_freq = 0,
+			},
+		},
+		.init_level = 0,
+		.num_levels = 3,
+		.set_grp_async = set_grp3d_async,
+		.idle_timeout = HZ/20,
+		.nap_allowed = true,
+	},
+	.clk = {
+		.name = {
+			.clk = "core_clk",
+			.pclk = "iface_clk",
+		},
+	},
+	.imem_clk_name = {
+		.clk = "mem_clk",
+		.pclk = NULL,
+	},
+};
+
+struct platform_device msm_kgsl_3d0 = {
+	.name = "kgsl-3d0",
+	.id = 0,
+	.num_resources = ARRAY_SIZE(kgsl_3d0_resources),
+	.resource = kgsl_3d0_resources,
+	.dev = {
+		.platform_data = &kgsl_3d0_pdata,
+	},
+};
+
+static struct resource kgsl_2d0_resources[] = {
+	{
+		.name = KGSL_2D0_REG_MEMORY,
+		.start = 0xA3900000, /* Z180 base address */
+		.end = 0xA3900FFF,
+		.flags = IORESOURCE_MEM,
+	},
+	{
+		.name = KGSL_2D0_IRQ,
+		.start = INT_GRP_2D,
+		.end = INT_GRP_2D,
+		.flags = IORESOURCE_IRQ,
+	},
+};
+
+static struct kgsl_device_platform_data kgsl_2d0_pdata = {
+	.pwr_data = {
+		.pwrlevel = {
+			{
+				.gpu_freq = 0,
+				.bus_freq = 192000000,
+			},
+		},
+		.init_level = 0,
+		.num_levels = 1,
+		/* HW workaround, run Z180 SYNC @ 192 MHZ */
+		.set_grp_async = NULL,
+		.idle_timeout = HZ/10,
+		.nap_allowed = true,
+	},
+	.clk = {
+		.name = {
+			.clk = "core_clk",
+			.pclk = "iface_clk",
+		},
+	},
+};
+
+struct platform_device msm_kgsl_2d0 = {
+	.name = "kgsl-2d0",
+	.id = 0,
+	.num_resources = ARRAY_SIZE(kgsl_2d0_resources),
+	.resource = kgsl_2d0_resources,
+	.dev = {
+		.platform_data = &kgsl_2d0_pdata,
+	},
+};
+
+struct platform_device *msm_footswitch_devices[] = {
+	FS_PCOM(FS_GFX2D0, "fs_gfx2d0"),
+	FS_PCOM(FS_GFX3D,  "fs_gfx3d"),
+	FS_PCOM(FS_MDP,    "fs_mdp"),
+	FS_PCOM(FS_MFC,    "fs_mfc"),
+	FS_PCOM(FS_ROT,    "fs_rot"),
+	FS_PCOM(FS_VFE,    "fs_vfe"),
+	FS_PCOM(FS_VPE,    "fs_vpe"),
+};
+unsigned msm_num_footswitch_devices = ARRAY_SIZE(msm_footswitch_devices);
