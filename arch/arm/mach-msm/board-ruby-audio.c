@@ -19,15 +19,17 @@
 #include <linux/delay.h>
 #include <linux/pmic8058-othc.h>
 #include <linux/regulator/consumer.h>
-#include <linux/spi/spi_aic3254.h>
+#include <linux/spi_aic3254.h>
 
 #include <mach/gpio.h>
 #include <mach/dal.h>
-#include <mach/tpa2051d3.h>
-#include <mach/qdsp6v2_1x/snddev_icodec.h>
-#include <mach/qdsp6v2_1x/snddev_ecodec.h>
-#include <mach/qdsp6v2_1x/snddev_hdmi.h>
-#include <mach/qdsp6v2_1x/audio_dev_ctl.h>
+#include <linux/tpa2051d3.h>
+#include <mach/qdsp6v3/snddev_icodec.h>
+#include <mach/qdsp6v3/snddev_ecodec.h>
+#include <mach/qdsp6v3/snddev_hdmi.h>
+#include <mach/qdsp6v3/audio_dev_ctl.h>
+#include <mach/qdsp6v3/apr_audio.h>
+#include <mach/qdsp6v3/q6asm.h>
 #include <mach/htc_acoustic_8x60.h>
 
 #include "board-ruby.h"
