@@ -456,6 +456,71 @@ struct platform_device *msm_add_gsbi9_uart(void)
 }
 #endif
 
+static struct resource gsbi2_qup_spi_resources[] = {
+	{
+		.name   = "spi_base",
+		.start  = MSM_GSBI2_QUP_PHYS,
+		.end    = MSM_GSBI2_QUP_PHYS + SZ_4K - 1,
+		.flags  = IORESOURCE_MEM,
+	},
+	{
+		.name   = "gsbi_base",
+		.start  = MSM_GSBI2_PHYS,
+		.end    = MSM_GSBI2_PHYS + 4 - 1,
+		.flags  = IORESOURCE_MEM,
+	},
+	{
+		.name   = "spi_irq_in",
+		.start  = GSBI2_QUP_IRQ,
+		.end    = GSBI2_QUP_IRQ,
+		.flags  = IORESOURCE_IRQ,
+	},
+	{
+		.name   = "spidm_channels",
+		.start  = 5,
+		.end    = 6,
+		.flags  = IORESOURCE_DMA,
+	},
+	{
+		.name   = "spidm_crci",
+		.start  = 8,
+		.end    = 7,
+		.flags  = IORESOURCE_DMA,
+	},
+	{
+		.name   = "spi_clk",
+		.start  = 40,
+		.end    = 40,
+		.flags  = IORESOURCE_IO,
+	},
+	{
+		.name   = "spi_cs",
+		.start  = 39,
+		.end    = 39,
+		.flags  = IORESOURCE_IO,
+	},
+	{
+		.name   = "spi_miso",
+		.start  = 38,
+		.end    = 38,
+		.flags  = IORESOURCE_IO,
+	},
+	{
+		.name   = "spi_mosi",
+		.start  = 37,
+		.end    = 37,
+		.flags  = IORESOURCE_IO,
+	},
+};
+
+/* Use GSBI2 QUP for SPI-1 */
+struct platform_device msm_gsbi2_qup_spi_device = {
+	.name       = "spi_qsd",
+	.id     = 1,
+	.num_resources  = ARRAY_SIZE(gsbi2_qup_spi_resources),
+	.resource   = gsbi2_qup_spi_resources,
+};
+
 static struct resource gsbi3_qup_i2c_resources[] = {
 	{
 		.name	= "qup_phys_addr",
