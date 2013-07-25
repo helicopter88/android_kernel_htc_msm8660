@@ -364,15 +364,13 @@ obj-$(CONFIG_MACH_PYRAMID) += board-pyramid-mmc.o board-pyramid-wifi.o htc_wifi_
 obj-$(CONFIG_MACH_PYRAMID) += htc_util.o
 obj-$(CONFIG_MACH_PYRAMID) += board-pyramid-audio.o
 
-obj-$(CONFIG_MACH_SHOOTER) += board-shooter.o
-obj-$(CONFIG_MACH_SHOOTER) += board-shooter-keypad.o
-obj-$(CONFIG_MACH_SHOOTER) += board-shooter-audio.o
+obj-$(CONFIG_MACH_SHOOTER) += board-shooter.o devices_htc.o
+obj-$(CONFIG_MACH_SHOOTER) += board-shooter-keypad.o board-shooter-gpiomux.o
+obj-$(CONFIG_MACH_SHOOTER) += board-shooter-camera.o htc_awb_cal.o
 obj-$(CONFIG_MACH_SHOOTER) += htc_bdaddress.o board-shooter-rfkill.o
-ifeq ($(CONFIG_WIMAX),y)
-obj-$(CONFIG_MACH_SHOOTER) += board-shooter-mmc.o board-shooter-wifi.o board-common-wimax.o
-else
-obj-$(CONFIG_MACH_SHOOTER) += board-shooter-mmc.o board-shooter-wifi.o
-endif
+obj-$(CONFIG_MACH_SHOOTER) += board-shooter-mmc.o board-shooter-wifi.o htc_wifi_nvs.o
+obj-$(CONFIG_MACH_SHOOTER) += htc_util.o
+obj-$(CONFIG_MACH_SHOOTER) += board-shooter-audio.o
 
 obj-$(CONFIG_MACH_SHOOTER_U) += board-shooter_u.o
 obj-$(CONFIG_MACH_SHOOTER_U) += board-shooter_u-keypad.o
