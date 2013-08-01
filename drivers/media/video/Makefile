@@ -212,7 +212,10 @@ obj-$(CONFIG_VIDEO_IR_I2C)  += ir-kbd-i2c.o
 
 obj-y	+= davinci/
 
-obj-$(CONFIG_MSM_CAMERA) += msm/
+ifeq ($(CONFIG_MSM_CAMERA),y)
+obj-$(CONFIG_MSM_CAMERA_NEW) += msm/
+obj-$(CONFIG_MSM_CAMERA_OLD) += msm_legacy/
+endif
 obj-$(CONFIG_ARCH_OMAP)	+= omap/
 #obj-$(CONFIG_MSM_VIDC) += msm_vidc/
 obj-$(CONFIG_VIDEO_NMI) += nmi/
