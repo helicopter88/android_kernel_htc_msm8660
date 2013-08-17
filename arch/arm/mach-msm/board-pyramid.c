@@ -124,7 +124,7 @@
 #include <mach/perflock.h>
 #endif
 
-#include <mach/tpa2051d3.h>
+#include <linux/tpa2051d3.h>
 #include <linux/cy8c_tma_ts.h>
 #include <linux/isl29028.h>
 #include <linux/isl29029.h>

@@ -16,12 +16,12 @@
 #include <linux/mfd/pmic8058.h>
 #include <linux/delay.h>
 #include <linux/pmic8058-othc.h>
-#include <linux/spi/spi_aic3254.h>
+#include <linux/spi_aic3254.h>
 #include <linux/regulator/consumer.h>
 
 #include <mach/gpio.h>
 #include <mach/dal.h>
-#include <mach/tpa2051d3.h>
+#include <linux/tpa2051d3.h>
 #include "qdsp6v2/snddev_icodec.h"
 #include "qdsp6v2/snddev_ecodec.h"
 #include "qdsp6v2/snddev_hdmi.h"
