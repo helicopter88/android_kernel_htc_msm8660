@@ -132,6 +132,11 @@
 #include "pm-boot.h"
 #include "board-storage-common-a.h"
 #include <mach/board_htc.h>
+#include <linux/tpa2051d3.h>
+#include <linux/akm8975.h>
+#include <linux/bma250.h>
+#include <linux/ewtzmu2.h>
+#include <linux/ti_wilink_st.h>
 
 #include <linux/ion.h>
 #include <mach/ion.h>

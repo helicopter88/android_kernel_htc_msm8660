@@ -32,7 +32,7 @@
 #include "snddev_ecodec.h"
 #include "snddev_hdmi.h"
 #include "snddev_mi2s.h"
-#include <linux/spi/spi_aic3254.h>
+#include <linux/spi_aic3254.h>
 #include "snddev_virtual.h"
 
 #undef pr_info

@@ -33,7 +33,7 @@
 #include <sound/q6afe.h>
 #include <sound/apr_audio.h>
 #include "snddev_icodec.h"
-#include <linux/spi/spi_aic3254.h>
+#include <linux/spi_aic3254.h>
 
 #define SNDDEV_ICODEC_PCM_SZ 32 
 #define SNDDEV_ICODEC_MUL_FACTOR 3 

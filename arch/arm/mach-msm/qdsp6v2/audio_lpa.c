@@ -33,7 +33,7 @@
 #include <linux/slab.h>
 #include <asm/atomic.h>
 #include <asm/ioctls.h>
-#include <mach/msm_adsp.h>
+#include <linux/msm_adsp.h>
 #include <sound/q6asm.h>
 #include <sound/apr_audio.h>
 #include "audio_lpa.h"

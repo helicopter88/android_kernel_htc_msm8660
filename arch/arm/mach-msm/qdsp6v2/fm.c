@@ -34,7 +34,7 @@
 #include <linux/msm_audio.h>
 #include <asm/atomic.h>
 #include <asm/ioctls.h>
-#include <mach/msm_adsp.h>
+#include <linux/msm_adsp.h>
 #include <mach/qdsp6v2/audio_dev_ctl.h>
 #include <sound/q6afe.h>
 
