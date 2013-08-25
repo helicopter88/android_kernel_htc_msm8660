@@ -143,7 +143,6 @@
 #include <mach/msm_rtb.h>
 #include <mach/htc_util.h>
 
-#include <mach/tpa2051d3.h>
 #include <linux/isl29028.h>
 #include <linux/isl29029.h>
 
