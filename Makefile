@@ -632,6 +632,12 @@ KBUILD_CFLAGS += $(call cc-option,-Wdeclaration-after-statement,)
 # disable pointer signed / unsigned warnings in gcc 4.0
 KBUILD_CFLAGS += $(call cc-disable-warning, pointer-sign)
 
+# disable maybe uninitialized warnings in gcc 4.7
+KBUILD_CFLAGS += $(call cc-disable-warning, maybe-uninitialized)
+
+# disable unused function warnings in gcc 4.7
+KBUILD_CFLAGS += $(call cc-disable-warning, unused-function)
+
 # disable invalid "can't wrap" optimizations for signed / pointers
 KBUILD_CFLAGS	+= $(call cc-option,-fno-strict-overflow)
 
