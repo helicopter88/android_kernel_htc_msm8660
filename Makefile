@@ -395,7 +395,7 @@ endif
 
 KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Werror-implicit-function-declaration \
-	           -fno-strict-aliasing
+	           -fno-strict-aliasing -fno-common
 
 ifdef CONFIG_CC_OPTIMIZE_ALOT
 KBUILD_AFLAGS_KERNEL := -D__ASSEMBLY__ -Ofast
