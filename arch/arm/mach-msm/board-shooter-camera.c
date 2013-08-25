@@ -31,12 +31,14 @@
 #endif
 
 extern unsigned int engineerid;
+#ifdef CONFIG_MSM_CAMERA
 static int camera_sensor_power_enable(char *power, unsigned volt, struct regulator **sensor_power);
 static int camera_sensor_power_disable(struct regulator *sensor_power);
 static struct platform_device msm_camera_server = {
 	.name = "msm_cam_server",
 	.id = 0,
 };
+#endif
 
 #ifdef CONFIG_MSM_CAMERA
 static struct msm_bus_vectors cam_init_vectors[] = {
@@ -305,7 +307,7 @@ static uint32_t camera_on_gpio_table_sp3d[] = {
 	GPIO_CFG(SHOOTER_WEBCAM_STB, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),
 	GPIO_CFG(SHOOTER_CAM_SEL, 0, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_2MA),
 };
-
+#ifdef CONFIG_SP3D
 static uint32_t sp3d_spi_gpio[] = {
 	/* or this? the i/o direction and up/down are much more correct */
 	GPIO_CFG(SHOOTER_SP3D_SPI_DO,  1, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_DOWN, GPIO_CFG_8MA),
@@ -313,7 +315,7 @@ static uint32_t sp3d_spi_gpio[] = {
 	GPIO_CFG(SHOOTER_SP3D_SPI_CS,  1, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_8MA),
 	GPIO_CFG(SHOOTER_SP3D_SPI_CLK, 1, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_DOWN, GPIO_CFG_8MA),
 };
-
+#endif
 static uint32_t camera_off_gpio_table_liteon[] = {
 	GPIO_CFG(SHOOTER_CAM_I2C_SDA, 1, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA),/*i2c*/
 	GPIO_CFG(SHOOTER_CAM_I2C_SCL, 1, GPIO_CFG_OUTPUT, GPIO_CFG_NO_PULL, GPIO_CFG_8MA),/*i2c*/
@@ -696,7 +698,7 @@ struct resource msm_camera_resources[] = {
 		.flags	= IORESOURCE_IRQ,
 	},
 };
-
+#ifdef CONFIG_SP3D
 static struct spi_board_info sp3d_spi_board_info[] __initdata = {
 	{
 		.modalias	= "sp3d_spi",
@@ -706,7 +708,7 @@ static struct spi_board_info sp3d_spi_board_info[] __initdata = {
 		.max_speed_hz	= 15060000,
 	}
 };
-
+#endif
 #ifdef CONFIG_MSM_CAMERA_FLASH
 int flashlight_control(int mode)
 {
