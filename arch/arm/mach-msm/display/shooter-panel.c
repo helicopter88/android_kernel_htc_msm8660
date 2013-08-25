@@ -56,7 +56,6 @@ static char enable_te[2] = {0x35, 0x00};
 static char test_reg[3] = {0x44, 0x01, 0x3f};
 static char max_pktsize[2] = {MIPI_DSI_MRPS, 0x00};
 
-void mdp4_dsi_color_enhancement(const struct mdp_reg *reg_seq, int size);
 
 static struct pm_gpio pwm_gpio_config = {
 		.direction	= PM_GPIO_DIR_OUT,
@@ -1162,7 +1161,6 @@ struct mdp_reg mdp_sharp_barrier_off[] = {
 int shooter_mdp_gamma(void)
 {
 	PR_DISP_INFO("%s\n", __func__);
-	mdp4_dsi_color_enhancement(mdp_sharp_barrier_off, ARRAY_SIZE(mdp_sharp_barrier_off));
 
 	return 0;
 }
@@ -1197,13 +1195,11 @@ static void shooter_3Dpanel_on(bool bLandscape)
 	pwm_enable(pwm_3d);
 
 	if (bLandscape) {
-		mdp4_dsi_color_enhancement(mdp_sharp_barrier_on, ARRAY_SIZE(mdp_sharp_barrier_on));
 		gpio_set_value(SHOOTER_CTL_3D_1, 1);
 		gpio_set_value(SHOOTER_CTL_3D_2, 1);
 		gpio_set_value(SHOOTER_CTL_3D_3, 1);
 		gpio_set_value(SHOOTER_CTL_3D_4, 0);
 	} else {
-		mdp4_dsi_color_enhancement(mdp_sharp_barrier_on, ARRAY_SIZE(mdp_sharp_barrier_on));
 		gpio_set_value(SHOOTER_CTL_3D_1, 1);
 		gpio_set_value(SHOOTER_CTL_3D_2, 1);
 		gpio_set_value(SHOOTER_CTL_3D_3, 0);
@@ -1220,7 +1216,6 @@ static void shooter_3Dpanel_off(void)
 		if (rc < 0)
 			pr_err("%s pmic gpio config gpio %d failed\n", __func__, SHOOTER_3DLCM_PD);
 	}
-	mdp4_dsi_color_enhancement(mdp_sharp_barrier_off, ARRAY_SIZE(mdp_sharp_barrier_off));
 	pwm_disable(pwm_3d);
 
 	rc = pm8xxx_gpio_config(PM8058_GPIO_PM_TO_SYS(SHOOTER_3DCLK), &clk_gpio_config_off);
