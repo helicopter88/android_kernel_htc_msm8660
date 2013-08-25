@@ -53,8 +53,8 @@ int sysmon_send_event(enum subsys_id dest_ss, const char *event_ss,
 	char tx_buf[MAX_MSG_LENGTH];
 	int ret;
 
-	if (dest_ss < 0 || dest_ss >= SYSMON_NUM_SS ||
-	    notif < 0 || notif >= SUBSYS_NOTIF_TYPE_COUNT ||
+	if (dest_ss >= SYSMON_NUM_SS ||
+	     notif >= SUBSYS_NOTIF_TYPE_COUNT ||
 	    event_ss == NULL)
 		return -EINVAL;
 
