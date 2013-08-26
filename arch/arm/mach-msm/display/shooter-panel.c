@@ -309,7 +309,7 @@ static int __init shooter_shooter_blue_qhd_pt_init(void)
 	if (ret)
 		pr_err("%s: failed to register device!\n", __func__);
 
-	this_driver.driver.name = "mipi_video_novatek_qhd";
+	this_driver.driver.name = "mipi_novatek";
 
 	return ret;
 }
