@@ -582,6 +582,7 @@ struct msm_fb_platform_data {
 	int (*allow_set_offset)(void);
 	char prim_panel_name[PANEL_NAME_MAX_LEN];
 	char ext_panel_name[PANEL_NAME_MAX_LEN];
+	unsigned char ext_resolution;
 };
 
 #define HDMI_VFRMT_640x480p60_4_3 0
