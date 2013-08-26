@@ -304,12 +304,12 @@ static int __init shooter_shooter_blue_qhd_pt_init(void)
 	pinfo.mipi.wr_mem_start = 0x2c;
 	pinfo.mipi.dsi_phy_db = &dsi_cmd_mode_phy_db;
 
-	ret = mipi_shooter_device_register("mipi_novatek", &pinfo, MIPI_DSI_PRIM,
+	ret = mipi_shooter_device_register("mipi_video_novatek_qhd", &pinfo, MIPI_DSI_PRIM,
 						MIPI_DSI_PANEL_QHD_PT);
 	if (ret)
 		pr_err("%s: failed to register device!\n", __func__);
 
-	this_driver.driver.name = "mipi_novatek";
+	this_driver.driver.name = "mipi_video_novatek_qhd";
 
 	return ret;
 }

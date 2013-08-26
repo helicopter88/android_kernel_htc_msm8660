@@ -1761,6 +1761,11 @@ static int msm_fb_detect_panel(const char *name)
 				PANEL_NAME_MAX_LEN)))
 		return 0;
 
+	if (!strncmp(name, "mipi_video_novatek_qhd",
+			strnlen("mipi_video_novatek_qhd",
+				PANEL_NAME_MAX_LEN)))
+		return 0;
+
 	if (!strncmp(name, HDMI_PANEL_NAME,
 			strnlen(HDMI_PANEL_NAME,
 				PANEL_NAME_MAX_LEN))) {
