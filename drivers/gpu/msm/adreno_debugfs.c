@@ -1,4 +1,4 @@
-/* Copyright (c) 2002,2008-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2002,2008-2012, Code Aurora Forum. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -60,25 +60,9 @@ void adreno_debugfs_init(struct kgsl_device *device)
 		&adreno_dev->wait_timeout);
 	debugfs_create_u32("ib_check", 0644, device->d_debugfs,
 			   &adreno_dev->ib_check_level);
-	
+	/* By Default enable fast hang detection */
 	adreno_dev->fast_hang_detect = 1;
 	debugfs_create_u32("fast_hang_detect", 0644, device->d_debugfs,
 			   &adreno_dev->fast_hang_detect);
 
-	
-	adreno_dev->ft_user_control = 0;
-	debugfs_create_u32("ft_user_control", 0644, device->d_debugfs,
-			   &adreno_dev->ft_user_control);
-	adreno_dev->ft_policy = KGSL_FT_DEFAULT_POLICY;
-	debugfs_create_u32("ft_policy", 0644, device->d_debugfs,
-			   &adreno_dev->ft_policy);
-
-	
-	adreno_dev->long_ib_detect = 1;
-	debugfs_create_u32("long_ib_detect", 0644, device->d_debugfs,
-			   &adreno_dev->long_ib_detect);
-
-	adreno_dev->ft_pf_policy = KGSL_FT_PAGEFAULT_DEFAULT_POLICY;
-	debugfs_create_u32("ft_pagefault_policy", 0644, device->d_debugfs,
-			   &adreno_dev->ft_pf_policy);
 }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2010-2012, Code Aurora Forum. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -13,6 +13,9 @@
 #ifndef __KGSL_PWRCTRL_H
 #define __KGSL_PWRCTRL_H
 
+/*****************************************************************************
+** power flags
+*****************************************************************************/
 #define KGSL_PWRFLAGS_ON   1
 #define KGSL_PWRFLAGS_OFF  0
 
@@ -35,7 +38,6 @@ struct kgsl_clk_stats {
 	unsigned int elapsed_old;
 };
 
-
 struct kgsl_pwrctrl {
 	int interrupt_num;
 	struct clk *ebi1_clk;
@@ -45,8 +47,6 @@ struct kgsl_pwrctrl {
 	unsigned int active_pwrlevel;
 	int thermal_pwrlevel;
 	unsigned int default_pwrlevel;
-	unsigned int max_pwrlevel;
-	unsigned int min_pwrlevel;
 	unsigned int num_pwrlevels;
 	unsigned int interval_timeout;
 	bool strtstp_sleepwake;
@@ -83,4 +83,4 @@ static inline unsigned long kgsl_get_clkrate(struct clk *clk)
 
 void kgsl_pwrctrl_set_state(struct kgsl_device *device, unsigned int state);
 void kgsl_pwrctrl_request_state(struct kgsl_device *device, unsigned int state);
-#endif 
+#endif /* __KGSL_PWRCTRL_H */

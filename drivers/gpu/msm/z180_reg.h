@@ -1,4 +1,4 @@
-/* Copyright (c) 2002,2007-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2002,2007-2012, Code Aurora Forum. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -53,4 +53,4 @@
 #define ADDR_VGC_BUSYCNT				 0x530
 #define ADDR_VGC_FIFOFREE				 0x7c0
 
-#endif 
+#endif /* __Z180_REG_H */

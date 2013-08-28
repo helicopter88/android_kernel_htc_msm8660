@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2012, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2010-2012, Code Aurora Forum. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -134,7 +134,7 @@ static void adreno_dump_regs(struct kgsl_device *device,
 	int range = 0, offset = 0;
 
 	for (range = 0; range < size; range++) {
-		
+		/* start and end are in dword offsets */
 		int start = registers[range * 2];
 		int end = registers[range * 2 + 1];
 
@@ -192,7 +192,7 @@ static void dump_ib1(struct kgsl_device *device, uint32_t pt_base,
 	dump_ib(device, "IB1:", pt_base, base_offset, ib1_base,
 		ib1_size, dump);
 
-	
+	/* fetch virtual address for given IB base */
 	ib1_addr = (uint32_t *)adreno_convertaddr(device, pt_base,
 		ib1_base, ib1_size*sizeof(uint32_t));
 	if (!ib1_addr)
@@ -204,7 +204,7 @@ static void dump_ib1(struct kgsl_device *device, uint32_t pt_base,
 			uint32_t ib2_base = ib1_addr[i++];
 			uint32_t ib2_size = ib1_addr[i++];
 
-			
+			/* find previous match */
 			for (j = 0; j < ib_list->count; ++j)
 				if (ib_list->sizes[j] == ib2_size
 					&& ib_list->bases[j] == ib2_base)
@@ -214,7 +214,7 @@ static void dump_ib1(struct kgsl_device *device, uint32_t pt_base,
 				>= IB_LIST_SIZE)
 				continue;
 
-			
+			/* store match */
 			ib_list->sizes[ib_list->count] = ib2_size;
 			ib_list->bases[ib_list->count] = ib2_base;
 			ib_list->offsets[ib_list->count] = i<<2;
@@ -268,7 +268,7 @@ static bool adreno_rb_use_hex(void)
 #endif
 }
 
-void adreno_dump_rb(struct kgsl_device *device, const void *buf,
+static void adreno_dump_rb(struct kgsl_device *device, const void *buf,
 			 size_t len, int start, int size)
 {
 	const uint32_t *ptr = buf;
@@ -692,24 +692,21 @@ int adreno_dump(struct kgsl_device *device, int manual)
 	unsigned int ts_processed = 0xdeaddead;
 	struct kgsl_context *context;
 	unsigned int context_id;
-	unsigned int rbbm_status;
 
 	static struct ib_list ib_list;
 
 	struct adreno_device *adreno_dev = ADRENO_DEVICE(device);
 
+	struct kgsl_memdesc **reg_map;
+	void *reg_map_array;
 	int num_iommu_units = 0;
 
 	mb();
 
-	if (device->pm_dump_enable) {
-		if (adreno_is_a2xx(adreno_dev))
-			adreno_dump_a2xx(device);
-		else if (adreno_is_a3xx(adreno_dev))
-			adreno_dump_a3xx(device);
-	}
-
-	kgsl_regread(device, adreno_dev->gpudev->reg_rbbm_status, &rbbm_status);
+	if (adreno_is_a2xx(adreno_dev))
+		adreno_dump_a2xx(device);
+	else if (adreno_is_a3xx(adreno_dev))
+		adreno_dump_a3xx(device);
 
 	pt_base = kgsl_mmu_get_current_ptbase(&device->mmu);
 	cur_pt_base = pt_base;
@@ -724,18 +721,6 @@ int adreno_dump(struct kgsl_device *device, int manual)
 	kgsl_regread(device, REG_CP_IB2_BASE, &cp_ib2_base);
 	kgsl_regread(device, REG_CP_IB2_BUFSZ, &cp_ib2_bufsz);
 
-	
-	if (!device->pm_dump_enable) {
-
-		KGSL_LOG_DUMP(device,
-			"RBBM STATUS %08X | IB1:%08X/%08X | IB2: %08X/%08X"
-			" | RPTR: %04X | WPTR: %04X\n",
-			rbbm_status,  cp_ib1_base, cp_ib1_bufsz, cp_ib2_base,
-			cp_ib2_bufsz, cp_rb_rptr, cp_rb_wptr);
-
-		return 0;
-	}
-
 	kgsl_sharedmem_readl(&device->memstore,
 			(unsigned int *) &context_id,
 			KGSL_MEMSTORE_OFFSET(KGSL_MEMSTORE_GLOBAL,
@@ -744,7 +729,7 @@ int adreno_dump(struct kgsl_device *device, int manual)
 	if (context) {
 		ts_processed = kgsl_readtimestamp(device, context,
 						  KGSL_TIMESTAMP_RETIRED);
-		KGSL_LOG_DUMP(device, "FT CTXT: %d  TIMESTM RTRD: %08X\n",
+		KGSL_LOG_DUMP(device, "CTXT: %d  TIMESTM RTRD: %08X\n",
 				context->id, ts_processed);
 	} else
 		KGSL_LOG_DUMP(device, "BAD CTXT: %d\n", context_id);
@@ -794,11 +779,13 @@ int adreno_dump(struct kgsl_device *device, int manual)
 		memcpy(rb_copy+part1_c, rb_vaddr, (num_item-part1_c)<<2);
 	}
 
-	
+	/* extract the latest ib commands from the buffer */
 	ib_list.count = 0;
 	i = 0;
-	
-	num_iommu_units = kgsl_mmu_get_num_iommu_units(&device->mmu);
+	/* get the register mapped array in case we are using IOMMU */
+	num_iommu_units = kgsl_mmu_get_reg_map_desc(&device->mmu,
+							&reg_map_array);
+	reg_map = reg_map_array;
 	for (read_idx = 0; read_idx < num_item; ) {
 		uint32_t this_cmd = rb_copy[read_idx++];
 		if (adreno_cmd_is_ib(this_cmd)) {
@@ -812,27 +799,29 @@ int adreno_dump(struct kgsl_device *device, int manual)
 					ib_list.bases[i],
 					ib_list.sizes[i], 0);
 		} else if (this_cmd == cp_type0_packet(MH_MMU_PT_BASE, 1) ||
-			(num_iommu_units && this_cmd ==
-			kgsl_mmu_get_reg_gpuaddr(&device->mmu, 0,
-						KGSL_IOMMU_CONTEXT_USER,
-						KGSL_IOMMU_CTX_TTBR0))) {
+			(num_iommu_units && this_cmd == (reg_map[0]->gpuaddr +
+			(KGSL_IOMMU_CONTEXT_USER << KGSL_IOMMU_CTX_SHIFT) +
+			KGSL_IOMMU_TTBR0))) {
+
 			KGSL_LOG_DUMP(device, "Current pagetable: %x\t"
 				"pagetable base: %x\n",
-				kgsl_mmu_get_ptname_from_ptbase(&device->mmu,
-								cur_pt_base),
+				kgsl_mmu_get_ptname_from_ptbase(cur_pt_base),
 				cur_pt_base);
 
-			
+			/* Set cur_pt_base to the new pagetable base */
 			cur_pt_base = rb_copy[read_idx++];
 
 			KGSL_LOG_DUMP(device, "New pagetable: %x\t"
 				"pagetable base: %x\n",
-				kgsl_mmu_get_ptname_from_ptbase(&device->mmu,
-								cur_pt_base),
+				kgsl_mmu_get_ptname_from_ptbase(cur_pt_base),
 				cur_pt_base);
 		}
 	}
+	if (num_iommu_units)
+		kfree(reg_map_array);
 
+	/* Restore cur_pt_base back to the pt_base of
+	   the process in whose context the GPU hung */
 	cur_pt_base = pt_base;
 
 	read_idx = (int)cp_rb_rptr - NUM_DWORDS_OF_RINGBUFFER_HISTORY;
@@ -873,7 +862,7 @@ int adreno_dump(struct kgsl_device *device, int manual)
 		}
 	}
 
-	
+	/* Dump the registers if the user asked for it */
 	if (device->pm_regs_enabled) {
 		if (adreno_is_a20x(adreno_dev))
 			adreno_dump_regs(device, a200_registers,
@@ -884,14 +873,9 @@ int adreno_dump(struct kgsl_device *device, int manual)
 		else if (adreno_is_a225(adreno_dev))
 			adreno_dump_regs(device, a225_registers,
 				a225_registers_count);
-		else if (adreno_is_a3xx(adreno_dev)) {
+		else if (adreno_is_a3xx(adreno_dev))
 			adreno_dump_regs(device, a3xx_registers,
 					a3xx_registers_count);
-
-			if (adreno_is_a330(adreno_dev))
-				adreno_dump_regs(device, a330_registers,
-					a330_registers_count);
-		}
 	}
 
 error_vfree:
