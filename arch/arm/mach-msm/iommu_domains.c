@@ -15,10 +15,8 @@
 #include <linux/iommu.h>
 #include <linux/memory_alloc.h>
 #include <linux/platform_device.h>
-#include <linux/vmalloc.h>
 #include <linux/rbtree.h>
 #include <linux/slab.h>
-#include <linux/vmalloc.h>
 #include <asm/sizes.h>
 #include <asm/page.h>
 #include <mach/iommu.h>
@@ -26,6 +24,7 @@
 #include <mach/socinfo.h>
 #include <mach/msm_subsystem_map.h>
 
+/* dummy 64K for overmapping */
 char iommu_dummy[2*SZ_64K-4];
 
 struct msm_iova_data {
@@ -60,7 +59,7 @@ int msm_iommu_map_extra(struct iommu_domain *domain,
 		unsigned int nrpages = PFN_ALIGN(size) >> PAGE_SHIFT;
 		struct page *dummy_page = phys_to_page(phy_addr);
 
-		sglist = vmalloc(sizeof(*sglist) * nrpages);
+		sglist = kmalloc(sizeof(*sglist) * nrpages, GFP_KERNEL);
 		if (!sglist) {
 			ret = -ENOMEM;
 			goto out;
@@ -77,7 +76,7 @@ int msm_iommu_map_extra(struct iommu_domain *domain,
 				__func__, start_iova, domain);
 		}
 
-		vfree(sglist);
+		kfree(sglist);
 	} else {
 		unsigned long order = get_order(page_size);
 		unsigned long aligned_size = ALIGN(size, page_size);
@@ -132,7 +131,7 @@ static int msm_iommu_map_iova_phys(struct iommu_domain *domain,
 	int prot = IOMMU_WRITE | IOMMU_READ;
 	prot |= cached ? IOMMU_CACHE : 0;
 
-	sglist = vmalloc(sizeof(*sglist));
+	sglist = kmalloc(sizeof(*sglist), GFP_KERNEL);
 	if (!sglist) {
 		ret = -ENOMEM;
 		goto err1;
@@ -149,7 +148,7 @@ static int msm_iommu_map_iova_phys(struct iommu_domain *domain,
 			__func__, iova, domain);
 	}
 
-	vfree(sglist);
+	kfree(sglist);
 err1:
 	return ret;
 
@@ -291,7 +290,7 @@ int msm_allocate_iova_address(unsigned int iommu_domain,
 	va = gen_pool_alloc_aligned(pool->gpool, size, ilog2(align));
 	if (va) {
 		pool->free -= size;
-		
+		/* Offset because genpool can't handle 0 addresses */
 		if (pool->paddr == 0)
 			va -= SZ_4K;
 		*iova = va;
@@ -329,7 +328,7 @@ void msm_free_iova_address(unsigned long iova,
 
 	pool->free += size;
 
-	
+	/* Offset because genpool can't handle 0 addresses */
 	if (pool->paddr == 0)
 		iova += SZ_4K;
 
@@ -368,6 +367,12 @@ int msm_register_domain(struct msm_iova_layout *layout)
 		pools[i].paddr = layout->partitions[i].start;
 		pools[i].size = layout->partitions[i].size;
 
+		/*
+		 * genalloc can't handle a pool starting at address 0.
+		 * For now, solve this problem by offsetting the value
+		 * put in by 4k.
+		 * gen pool address = actual address + 4k
+		 */
 		if (pools[i].paddr == 0)
 			layout->partitions[i].start += SZ_4K;
 
