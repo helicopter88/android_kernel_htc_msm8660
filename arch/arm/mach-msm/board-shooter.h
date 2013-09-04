@@ -58,14 +58,14 @@
 #define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE + MSM_FB_DSUB_PMEM_ADDER, 4096)
 #endif 
 #ifdef CONFIG_MSM_IOMMU
-#define MSM_PMEM_SF_SIZE 0x00000000 
+#define MSM_PMEM_SF_SIZE 0x8000000
 #else
-#define MSM_PMEM_SF_SIZE 0x4000000 
+#define MSM_PMEM_SF_SIZE 0x8000000 
 #endif
 #define MSM_OVERLAY_BLT_SIZE   roundup(960 * ALIGN(540, 32) * 3 * 2, 4096)
 
 #define MSM_PMEM_KERNEL_EBI1_SIZE  0x600000 
-#define MSM_PMEM_ADSP_SIZE	0x2E00000
+#define MSM_PMEM_ADSP_SIZE	0x239C000
 #define MSM_PMEM_ADSP2_SIZE 0x1700000
 #define MSM_PMEM_AUDIO_SIZE	0x4CF000
 
@@ -87,32 +87,31 @@
 #define MSM_PMEM_SMIPOOL_SIZE USER_SMI_SIZE
 
 #ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
-#define MSM_ION_SF_SIZE       MSM_PMEM_SF_SIZE
-#define MSM_ION_CAMERA_SIZE   0x2000000
-#define MSM_ION_ROTATOR_SIZE  MSM_PMEM_ADSP2_SIZE
-#define MSM_ION_MM_FW_SIZE    0x200000  
-#define MSM_ION_MM_SIZE       0x3D00000 
-#define MSM_ION_MFC_SIZE      0x100000  
-#define MSM_ION_WB_SIZE       0x2FD000  
+#define MSM_ION_SF_SIZE       0x5000000 /* 80 Mbytes */
+#define MSM_ION_CAMERA_SIZE   MSM_PMEM_ADSP_SIZE
+#define MSM_ION_MM_FW_SIZE    0x200000 /* (2MB) */  
+#define MSM_ION_MM_SIZE	      0x3600000 /* (54MB) */ 
+#define MSM_ION_MFC_SIZE      0x1000000  
+#define MSM_ION_WB_SIZE       0x1E00000 /* 30MB */
 
 #ifdef CONFIG_TZCOM
 #define MSM_ION_QSECOM_SIZE   MSM_PMEM_KERNEL_EBI1_SIZE
-#ifdef CONFIG_MSM_IOMMU
-#define MSM_ION_HEAP_NUM      9
-#else
-#define MSM_ION_HEAP_NUM      10
-#endif
-#else
 #ifdef CONFIG_MSM_IOMMU
 #define MSM_ION_HEAP_NUM      8
 #else
 #define MSM_ION_HEAP_NUM      9
 #endif
+#else
+#ifdef CONFIG_MSM_IOMMU
+#define MSM_ION_HEAP_NUM      7
+#else
+#define MSM_ION_HEAP_NUM      8
+#endif
 #endif
 
-#define MSM_ION_CAMERA_BASE   (0x40E00000)	
-#define MSM_ION_WB_BASE       (0x46400000)
-#define MSM_ION_AUDIO_BASE    (0x7FB00000)
+#define MSM_ION_WB_BASE       (0x40400000)
+#define MSM_ION_AUDIO_BASE    (0x6BACA000)
+#define MSM_ION_MFC_BASE      (0x74B00000)
 
 #else 
 #define MSM_ION_HEAP_NUM      1

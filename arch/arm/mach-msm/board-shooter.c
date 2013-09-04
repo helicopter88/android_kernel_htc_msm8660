@@ -1702,7 +1702,7 @@ unsigned char hdmi_is_primary;
 #define MSM_MM_FW_BASE		MSM_SMI_BASE
 #define MSM_ION_HOLE_BASE	(MSM_MM_FW_BASE + MSM_MM_FW_SIZE)
 #define MSM_ION_MM_BASE		(MSM_ION_HOLE_BASE + MSM_ION_HOLE_SIZE)
-#define MSM_ION_MFC_BASE	(MSM_ION_MM_BASE + MSM_ION_MM_SIZE)
+//#define MSM_ION_MFC_BASE	(MSM_ION_MM_BASE + MSM_ION_MM_SIZE)
 
 #ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
 #define MSM_ION_AUDIO_SIZE	MSM_PMEM_AUDIO_SIZE
@@ -4069,6 +4069,7 @@ static struct ion_platform_data ion_pdata = {
 			.type	= ION_HEAP_TYPE_CP,
 			.name	= ION_MFC_HEAP_NAME,
 			.size	= MSM_ION_MFC_SIZE,
+			.base   = MSM_ION_MFC_BASE,
 			.memory_type = ION_SMI_TYPE,
 			.extra_data = (void *) &cp_mfc_ion_pdata,
 		},
@@ -4092,14 +4093,6 @@ static struct ion_platform_data ion_pdata = {
 			.memory_type = ION_EBI_TYPE,
 			.extra_data = (void *)&co_ion_pdata,
 		},
-		{
-			.id	= ION_CP_ROTATOR_HEAP_ID,
-			.type	= ION_HEAP_TYPE_CARVEOUT,
-			.name	= ION_ROTATOR_HEAP_NAME,
-			.size	= MSM_ION_ROTATOR_SIZE,
-			.memory_type = ION_EBI_TYPE,
-			.extra_data = &co_ion_pdata,
-		},
 #endif
 #ifdef CONFIG_MSM_IOMMU
 		{
@@ -4112,7 +4105,6 @@ static struct ion_platform_data ion_pdata = {
 			.id	= ION_CAMERA_HEAP_ID,
 			.type	= ION_HEAP_TYPE_CARVEOUT,
 			.name	= ION_CAMERA_HEAP_NAME,
-			.base	= MSM_ION_CAMERA_BASE,
 			.size	= MSM_ION_CAMERA_SIZE,
 			.memory_type = ION_EBI_TYPE,
 			.extra_data = &co_ion_pdata,
@@ -4219,9 +4211,6 @@ static void __init reserve_ion_memory(void)
 	msm8x60_reserve_table[MEMTYPE_SMI].size += MSM_ION_MFC_SIZE;
 	msm8x60_reserve_table[MEMTYPE_EBI1].size += msm_ion_sf_size;
 	msm8x60_reserve_table[MEMTYPE_EBI1].size += MSM_ION_AUDIO_SIZE;
-#ifndef CONFIG_MSM_IOMMU
-	msm8x60_reserve_table[MEMTYPE_EBI1].size += MSM_ION_ROTATOR_SIZE;
-#endif
 #ifdef CONFIG_TZCOM
 	msm8x60_reserve_table[MEMTYPE_EBI1].size += MSM_ION_QSECOM_SIZE;
 #endif
