@@ -1060,7 +1060,7 @@ static int __clk_set_parent(struct clk *clk, struct clk *parent)
 {
 	struct clk *old_parent;
 	unsigned long flags;
-	int ret = -EINVAL;
+	int ret;
 	u8 i;
 
 	old_parent = clk->parent;
@@ -1087,7 +1087,13 @@ static int __clk_set_parent(struct clk *clk, struct clk *parent)
 	if (i == clk->num_parents) {
 		pr_debug("%s: clock %s is not a possible parent of clock %s\n",
 				__func__, parent->name, clk->name);
-		goto out;
+		return -EINVAL;
+	}
+
+	if (clk->flags & CLK_SET_PARENT_GATE) {
+		ret = clk->ops->set_parent(clk->hw, i);
+		clk->parent = parent;
+		return ret;
 	}
 
 	/* migrate prepare and enable */
@@ -1096,23 +1102,23 @@ static int __clk_set_parent(struct clk *clk, struct clk *parent)
 
 	/* FIXME replace with clk_is_enabled(clk) someday */
 	spin_lock_irqsave(&enable_lock, flags);
+
 	if (clk->enable_count)
 		__clk_enable(parent);
-	spin_unlock_irqrestore(&enable_lock, flags);
 
 	/* change clock input source */
 	ret = clk->ops->set_parent(clk->hw, i);
+	clk->parent = parent;
 
 	/* clean up old prepare and enable */
-	spin_lock_irqsave(&enable_lock, flags);
 	if (clk->enable_count)
 		__clk_disable(old_parent);
+
 	spin_unlock_irqrestore(&enable_lock, flags);
 
 	if (clk->prepare_count)
 		__clk_unprepare(old_parent);
 
-out:
 	return ret;
 }
 
