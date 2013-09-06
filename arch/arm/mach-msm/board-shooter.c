@@ -2113,34 +2113,6 @@ static int shooter_ts_atmel_power(int on)
 	return 0;
 }
 
-static struct atmel_cfg ts_atmel_mferr_cfg_data[] = {
-	{.objid = GEN_POWERCONFIG_T7,		.byte = 1,     .value = 255,    .orival = 12},
-	{.objid = TOUCH_MULTITOUCHSCREEN_T9,    .byte = 7,     .value = 105,	.orival = 50},
-	{.objid = TOUCH_MULTITOUCHSCREEN_T9,    .byte = 13,    .value = 1,	.orival = 15},
-	{.objid = TOUCH_MULTITOUCHSCREEN_T9,    .byte = 31,    .value = 25,	.orival = 10},
-	{.objid = TOUCH_MULTITOUCHSCREEN_T9,    .byte = 34,    .value = 3,	.orival = 2},
-	{.objid = EXTRA_NOISE_SUPPRESSION_T58,  .byte = 0,     .value = 0,	.orival = 100},
-	{.objid = EXTRA_NOISE_SUPPRESSION_T58,  .byte = 1,     .value = 0, 	.orival = 20},
-	{.objid = EXTRA_NOISE_SUPPRESSION_T58,  .byte = 2,     .value = 0,	.orival = 3},
-	{.objid = EXTRA_NOISE_SUPPRESSION_T58,  .byte = 3,     .value = 0,	.orival = 1},
-	{.objid = EXTRA_NOISE_SUPPRESSION_T58,  .byte = 4,     .value = 0,	.orival = 50},
-	{.objid = SPT_CTECONFIG_T46,            .byte = 3,     .value = 63,	.orival = 16},
-	{.objid = PROCG_NOISESUPPRESSION_T48,   .byte = 8,     .value = 18,	.orival = 0},
-	{.objid = PROCG_NOISESUPPRESSION_T48,   .byte = 9,     .value = 30,	.orival = 0},
-	{.objid = PROCG_NOISESUPPRESSION_T48,   .byte = 11,    .value = 45,	.orival = 20},
-};
-
-static struct atmel_cfg ts_atmel_cfm_calb_data[] = {
-	{.objid = GEN_ACQUISITIONCONFIG_T8,    .byte = 6,    .value = 255,	.orival = 5},
-	{.objid = GEN_ACQUISITIONCONFIG_T8,    .byte = 7,    .value = 1,	.orival = 25},
-	{.objid = GEN_ACQUISITIONCONFIG_T8,    .byte = 8,    .value = 0,	.orival = 5},
-	{.objid = GEN_ACQUISITIONCONFIG_T8,    .byte = 9,    .value = 0,	.orival = 192},
-};
-
-static struct atmel_cfg ts_atmel_cable_cfg_data[] = {
-	{.objid = TOUCH_MULTITOUCHSCREEN_T9,    .byte = 8,    .value = 3,	.orival = 2},
-};
-
 struct atmel_i2c_platform_data shooter_ts_atmel_data[] = {
 	{
 		.version = 0x020,
@@ -2175,12 +2147,7 @@ struct atmel_i2c_platform_data shooter_ts_atmel_data[] = {
 		.noise_config = {45, 2, 35},
 		.GCAF_level = {20, 24, 28, 40, 63},
 		.workaround 	  = TW_SHIFT,
-		.cable_config	  = {	.cnt = ARRAY_SIZE(ts_atmel_cable_cfg_data),
-					.cfg = ts_atmel_cable_cfg_data, },
-		.mferr_config 	  = { 	.cnt = ARRAY_SIZE(ts_atmel_mferr_cfg_data),
-					.cfg = ts_atmel_mferr_cfg_data, },
-		.cfm_calb	  = {	.cnt = ARRAY_SIZE(ts_atmel_cfm_calb_data),
-					.cfg = ts_atmel_cfm_calb_data, },
+		.cable_config = {35, 25, 8, 16},
 	},
 	{
 		.version = 0x020,
@@ -2215,12 +2182,7 @@ struct atmel_i2c_platform_data shooter_ts_atmel_data[] = {
 		.noise_config = {45, 2, 35},
 		.GCAF_level = {20, 24, 28, 40, 63},
 		.workaround 	  = TW_SHIFT,
-		.cable_config	  = {	.cnt = ARRAY_SIZE(ts_atmel_cable_cfg_data),
-					.cfg = ts_atmel_cable_cfg_data, },
-		.mferr_config 	  = { 	.cnt = ARRAY_SIZE(ts_atmel_mferr_cfg_data),
-					.cfg = ts_atmel_mferr_cfg_data, },
-		.cfm_calb	  = {	.cnt = ARRAY_SIZE(ts_atmel_cfm_calb_data),
-					.cfg = ts_atmel_cfm_calb_data, },
+		.cable_config = {35, 25, 8, 16},
 	},
 	{
 		.version = 0x016,
@@ -2252,12 +2214,7 @@ struct atmel_i2c_platform_data shooter_ts_atmel_data[] = {
 		.config_T28 = {0, 0, 4, 4, 8, 60},
 		.GCAF_level = {20, 24, 28, 40, 63},
 		.workaround 	  = TW_SHIFT,
-		.cable_config	  = {	.cnt = ARRAY_SIZE(ts_atmel_cable_cfg_data),
-					.cfg = ts_atmel_cable_cfg_data, },
-		.mferr_config 	  = { 	.cnt = ARRAY_SIZE(ts_atmel_mferr_cfg_data),
-					.cfg = ts_atmel_mferr_cfg_data, },
-		.cfm_calb	  = {	.cnt = ARRAY_SIZE(ts_atmel_cfm_calb_data),
-					.cfg = ts_atmel_cfm_calb_data, },
+		.cable_config = {35, 25, 8, 16},
 	},
 	{
 		.version = 0x016,
@@ -2289,12 +2246,7 @@ struct atmel_i2c_platform_data shooter_ts_atmel_data[] = {
 		.config_T28 = {0, 0, 4, 4, 8, 60},
 		.GCAF_level = {20, 24, 28, 40, 63},
 		.workaround 	  = TW_SHIFT,
-		.cable_config	  = {	.cnt = ARRAY_SIZE(ts_atmel_cable_cfg_data),
-					.cfg = ts_atmel_cable_cfg_data, },
-		.mferr_config 	  = { 	.cnt = ARRAY_SIZE(ts_atmel_mferr_cfg_data),
-					.cfg = ts_atmel_mferr_cfg_data, },
-		.cfm_calb	  = {	.cnt = ARRAY_SIZE(ts_atmel_cfm_calb_data),
-					.cfg = ts_atmel_cfm_calb_data, },
+		.cable_config = {35, 25, 8, 16},
 	},
 };
 
