@@ -110,8 +110,8 @@
 #endif
 
 #define MSM_ION_WB_BASE       (0x40400000)
-#define MSM_ION_AUDIO_BASE    (0x6BACA000)
 #define MSM_ION_MFC_BASE      (0x74B00000)
+#define MSM_ION_AUDIO_BASE    (0x7FB00000)
 
 #else 
 #define MSM_ION_HEAP_NUM      1
