@@ -34,6 +34,7 @@ static int __devinit shooter_lcd_probe(struct platform_device *pdev);
 static void shooter_lcd_shutdown(struct platform_device *pdev);
 static int shooter_lcd_on(struct platform_device *pdev);
 static int shooter_lcd_off(struct platform_device *pdev);
+static int shooter_display_on(struct platform_device *pdev);
 static void shooter_set_backlight(struct msm_fb_data_type *mfd);
 static int mipi_shooter_device_register(const char* dev_name, struct msm_panel_info *pinfo, u32 channel, u32 panel);
 static int wled_trigger_initialized;
@@ -44,7 +45,7 @@ static struct msm_panel_info pinfo;
 static int cur_bl_level = 0;
 static int mipi_lcd_on = 1;
 struct dcs_cmd_req cmdreq_shooter;
-static u32 manu_id;
+static int panel_powered = 0;
 
 static char sw_reset[2] = {0x01, 0x00};
 static char enter_sleep[2] = {0x10, 0x00};
@@ -177,7 +178,7 @@ static struct dsi_cmd_desc shr_sharp_cmd_on_cmds[] = {
 static struct dsi_cmd_desc shr_sharp_display_off_cmds[] = {
 	{DTYPE_DCS_WRITE, 1, 0, 0, 0,
 		sizeof(display_off), display_off},
-	{DTYPE_DCS_WRITE, 1, 0, 0, 110,
+	{DTYPE_DCS_WRITE, 1, 0, 0, 100,
 		sizeof(enter_sleep), enter_sleep}
 };
 
@@ -191,25 +192,22 @@ static char manufacture_id[2] = {0x04, 0x00};
 static struct dsi_cmd_desc shooter_manufacture_id_cmd = {
 	DTYPE_DCS_READ, 1, 0, 1, 5, sizeof(manufacture_id), manufacture_id};
 
-static void mipi_shooter_manufature_cb(u32 data)
-{
-	manu_id = data;
-	pr_info("%s: manufature_id=%x\n", __func__, manu_id);
-}
-
 static uint32 mipi_shooter_manufacture_id(struct msm_fb_data_type *mfd)
 {
-	cmdreq_shooter.cmds = &shooter_manufacture_id_cmd;
-	cmdreq_shooter.cmds_cnt = 1;
-	cmdreq_shooter.flags = CMD_REQ_RX | CMD_REQ_COMMIT;
-	cmdreq_shooter.rlen = 3;
-	cmdreq_shooter.cb = mipi_shooter_manufature_cb;
-	mipi_dsi_cmdlist_put(&cmdreq_shooter);
+	struct dsi_buf *rp, *tp;
+	struct dsi_cmd_desc *cmd;
+	uint32 *lp;
 
-	return manu_id;
+	tp = &panel_tx_buf;
+	rp = &panel_rx_buf;
+	cmd = &shooter_manufacture_id_cmd;
+	mipi_dsi_cmds_rx(mfd, tp, rp, cmd, 3);
+	lp = (uint32 *)rp->data;
+	pr_info("%s: manufacture_id=%x\n", __func__, *lp);
+	return *lp;
 }
 
-#define BRI_SETTING_MIN		30
+#define BRI_SETTING_MIN		1
 #define BRI_SETTING_DEF		143
 #define BRI_SETTING_MAX		255
 
@@ -358,7 +356,7 @@ static int shooter_lcd_on(struct platform_device *pdev)
 	if (mipi->mode == DSI_VIDEO_MODE) {		
 		PR_DISP_ERR("%s: not support DSI_VIDEO_MODE!(%d)", __func__, mipi->mode);
 	} else {
-		if (!mipi_lcd_on) {
+		if (!mipi_lcd_on && !panel_powered) {
 			mipi_dsi_cmd_bta_sw_trigger(); 
 			if (panel_type == PANEL_ID_SHR_SHARP_NT) {
 				cmdreq_shooter.cmds = shr_sharp_cmd_on_cmds;
@@ -367,28 +365,44 @@ static int shooter_lcd_on(struct platform_device *pdev)
 				cmdreq_shooter.rlen = 0;
 				cmdreq_shooter.cb = NULL;
 				mipi_dsi_cmdlist_put(&cmdreq_shooter);
+				shooter_display_on(pdev);
+				panel_powered = 1;
 			} else {
 				PR_DISP_ERR("%s: panel_type is not supported!(%d)", __func__, panel_type);
 			}
+		} else {
+			shooter_display_on(pdev);
+			mipi_dsi_cmd_bta_sw_trigger(); 
 		}
 
-		mipi_dsi_cmd_bta_sw_trigger(); 
 
 		mipi_shooter_manufacture_id(mfd);
 	}
 
-	mipi_lcd_on = 1;
-	if (panel_type == PANEL_ID_SHR_SHARP_NT) {
-               cmdreq_shooter.cmds = shr_sharp_display_on_cmds;
-               cmdreq_shooter.cmds_cnt = ARRAY_SIZE(shr_sharp_display_on_cmds);
-               cmdreq_shooter.flags = CMD_REQ_COMMIT;
-               cmdreq_shooter.rlen = 0;
-               cmdreq_shooter.cb = NULL;
-               mipi_dsi_cmdlist_put(&cmdreq_shooter);
-       }
-
 	cur_bl_level = 0;
 
+	return 0;
+}
+
+static int shooter_display_on(struct platform_device *pdev)
+{
+	struct msm_fb_data_type *mfd;
+        struct mipi_panel_info *mipi;
+
+	mfd = platform_get_drvdata(pdev);
+        if (!mfd)
+                return -ENODEV;
+        if (mfd->key != MFD_KEY)
+                return -EINVAL;
+
+        mipi  = &mfd->panel_info.mipi;
+
+        if (mipi->mode == DSI_VIDEO_MODE) {
+                PR_DISP_ERR("%s: not support DSI_VIDEO_MODE!(%d)", __func__, mipi->mode);
+        } else {
+		mipi_dsi_cmds_tx(&panel_tx_buf, shr_sharp_display_off_cmds,ARRAY_SIZE(shr_sharp_display_off_cmds));
+               }
+	mipi_lcd_on = 1;
 	return 0;
 }
 
@@ -406,14 +420,8 @@ static int shooter_lcd_off(struct platform_device *pdev)
 		return 0;
 
 	if (panel_type == PANEL_ID_SHR_SHARP_NT) {
-		cmdreq_shooter.cmds = shr_sharp_display_off_cmds;
-		cmdreq_shooter.cmds_cnt = ARRAY_SIZE(shr_sharp_display_off_cmds);
-		cmdreq_shooter.flags = CMD_REQ_COMMIT;
-		cmdreq_shooter.rlen = 0;
-		cmdreq_shooter.cb = NULL;
-		mipi_dsi_cmdlist_put(&cmdreq_shooter);
+		mipi_dsi_cmds_tx(&panel_tx_buf, shr_sharp_display_on_cmds,ARRAY_SIZE(shr_sharp_display_on_cmds));
 	}
-	mipi_lcd_on = 0;
 	return 0;
 }
 
