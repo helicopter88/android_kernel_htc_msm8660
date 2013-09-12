@@ -358,7 +358,7 @@ static int shooter_lcd_on(struct platform_device *pdev)
 	} else {
 		if (!mipi_lcd_on && !panel_powered) {
 			mipi_dsi_cmd_bta_sw_trigger(); 
-			//if (panel_type == PANEL_ID_SHR_SHARP_NT) {
+			if (panel_type == PANEL_ID_SHR_SHARP_NT) {
 				cmdreq_shooter.cmds = shr_sharp_cmd_on_cmds;
 				cmdreq_shooter.cmds_cnt = ARRAY_SIZE(shr_sharp_cmd_on_cmds);
 				cmdreq_shooter.flags = CMD_REQ_COMMIT;
@@ -367,9 +367,9 @@ static int shooter_lcd_on(struct platform_device *pdev)
 				mipi_dsi_cmdlist_put(&cmdreq_shooter);
 				shooter_display_on(pdev);
 				panel_powered = 1;
-			//} else {
-			//	PR_DISP_ERR("%s: panel_type is not supported!(%d)", __func__, panel_type);
-			//}
+			} else {
+				PR_DISP_ERR("%s: panel_type is not supported!(%d)", __func__, panel_type);
+			}
 		} else {
 			shooter_display_on(pdev);
 			mipi_dsi_cmd_bta_sw_trigger(); 
@@ -419,9 +419,9 @@ static int shooter_lcd_off(struct platform_device *pdev)
 	if (!mipi_lcd_on)
 		return 0;
 
-	//if (panel_type == PANEL_ID_SHR_SHARP_NT) {
+	if (panel_type == PANEL_ID_SHR_SHARP_NT) {
 		mipi_dsi_cmds_tx(&panel_tx_buf, shr_sharp_display_off_cmds,ARRAY_SIZE(shr_sharp_display_off_cmds));
-	//}
+	}
 	return 0;
 }
 
