@@ -400,7 +400,7 @@ static int shooter_display_on(struct platform_device *pdev)
         if (mipi->mode == DSI_VIDEO_MODE) {
                 PR_DISP_ERR("%s: not support DSI_VIDEO_MODE!(%d)", __func__, mipi->mode);
         } else {
-		mipi_dsi_cmds_tx(&panel_tx_buf, shr_sharp_display_on_cmds,ARRAY_SIZE(shr_sharp_display_on_cmds));
+		mipi_dsi_cmds_tx(&panel_tx_buf, shr_sharp_display_off_cmds,ARRAY_SIZE(shr_sharp_display_off_cmds));
                }
 	mipi_lcd_on = 1;
 	return 0;
@@ -420,7 +420,7 @@ static int shooter_lcd_off(struct platform_device *pdev)
 		return 0;
 
 	if (panel_type == PANEL_ID_SHR_SHARP_NT) {
-		mipi_dsi_cmds_tx(&panel_tx_buf, shr_sharp_display_off_cmds,ARRAY_SIZE(shr_sharp_display_off_cmds));
+		mipi_dsi_cmds_tx(&panel_tx_buf, shr_sharp_display_on_cmds,ARRAY_SIZE(shr_sharp_display_on_cmds));
 	}
 	return 0;
 }
