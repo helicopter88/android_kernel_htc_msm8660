@@ -1735,6 +1735,7 @@ static int __init pmem_adsp_size_setup(char *p)
 	return 0;
 }
 early_param("pmem_adsp_size", pmem_adsp_size_setup);
+
 static unsigned pmem_audio_size = MSM_PMEM_AUDIO_SIZE;
 
 static int __init pmem_audio_size_setup(char *p)
@@ -1823,6 +1824,7 @@ static struct platform_device android_pmem_adsp_device = {
 };
 #endif 
 
+#ifndef CONFIG_MSM8X60_AUDIO
 static struct android_pmem_platform_data android_pmem_audio_pdata = {
 	.name = "pmem_audio",
 	.allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
@@ -1835,6 +1837,7 @@ static struct platform_device android_pmem_audio_device = {
 	.id = 4,
 	.dev = { .platform_data = &android_pmem_audio_pdata },
 };
+#endif
 
 #define PMEM_BUS_WIDTH(_bw) \
 	{ \
@@ -3862,8 +3865,13 @@ static struct platform_device *shooter_devices[] __initdata = {
 	&android_pmem_device,
 	&android_pmem_adsp_device,
 	&android_pmem_smipool_device,
-#endif 
+#ifndef CONFIG_MSM8X60_AUDIO
 	&android_pmem_audio_device,
+#endif
+#endif 
+#ifndef CONFIG_MSM8X60_AUDIO
+	&android_pmem_audio_device,
+#endif
 #endif 
 #ifdef CONFIG_MSM_ROTATOR
 	&msm_rotator_device,
@@ -4062,6 +4070,15 @@ static struct ion_platform_data ion_pdata = {
 			.memory_type = ION_EBI_TYPE,
 			.extra_data = (void *) &cp_wb_ion_pdata,
 		},
+		{
+			.id	= ION_AUDIO_HEAP_ID,
+			.type	= ION_HEAP_TYPE_CARVEOUT,
+			.name	= ION_AUDIO_HEAP_NAME,
+			.base	= MSM_ION_AUDIO_BASE,
+			.size	= MSM_ION_AUDIO_SIZE,
+			.memory_type = ION_EBI_TYPE,
+			.extra_data = (void *)&co_ion_pdata,
+		},
 #endif
 	}
 };
@@ -4152,7 +4169,7 @@ static void __init reserve_ion_memory(void)
 #endif
 }
 
-#ifdef CONFIG_MSM8X60_AUDIO
+#ifndef CONFIG_MSM8X60_AUDIO
 static void __init size_pmem_device(struct android_pmem_platform_data *pdata, unsigned long start, unsigned long size)
 {
 	
@@ -4176,16 +4193,22 @@ static void __init size_pmem_devices(void)
 	}
 	size_pmem_device(&android_pmem_smipool_pdata, MSM_PMEM_SMIPOOL_BASE, MSM_PMEM_SMIPOOL_SIZE);
 #endif 
+#ifndef CONFIG_MSM8X60_AUDIO
 	size_pmem_device(&android_pmem_audio_pdata, MSM_PMEM_AUDIO_BASE, MSM_PMEM_AUDIO_SIZE);
+#endif
 #endif 
 }
 
 #ifdef CONFIG_ANDROID_PMEM
+#ifndef CONFIG_MSM_MULTIMEDIA_USE_ION
 static void __init reserve_memory_for(struct android_pmem_platform_data *p)
 {
-	pr_info("%s: reserving %lx bytes in memory pool for %s.\n", __func__, p->size, p->name);
-	msm8x60_reserve_table[p->memory_type].size += p->size;
+	if (p->start == 0) {
+		pr_info("%s: reserving %lx bytes in memory pool for %s.\n", __func__, p->size, p->name);
+		msm8x60_reserve_table[p->memory_type].size += p->size;
+	}
 }
+#endif 
 #endif 
 
 static void __init reserve_pmem_memory(void)
@@ -4195,8 +4218,10 @@ static void __init reserve_pmem_memory(void)
 	reserve_memory_for(&android_pmem_adsp_pdata);
 	reserve_memory_for(&android_pmem_smipool_pdata);
 	reserve_memory_for(&android_pmem_pdata);
-#endif 
+#ifndef CONFIG_MSM8X60_AUDIO
 	reserve_memory_for(&android_pmem_audio_pdata);
+#endif
+#endif 
 #endif 
 }
 
