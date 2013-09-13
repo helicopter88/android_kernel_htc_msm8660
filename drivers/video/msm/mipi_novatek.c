@@ -246,6 +246,7 @@ static char set_height[5] = { /* DTYPE_DCS_LWRITE */
 static char led_pwm2[2] = {0x53, 0x24}; /* DTYPE_DCS_WRITE1 */
 static char led_pwm3[2] = {0x55, 0x00}; /* DTYPE_DCS_WRITE1 */
 
+/*
 static struct dsi_cmd_desc novatek_video_on_cmds[] = {
 	{DTYPE_DCS_WRITE, 1, 0, 0, 50,
 		sizeof(sw_reset), sw_reset},
@@ -262,7 +263,7 @@ static struct dsi_cmd_desc novatek_video_on_cmds[] = {
 	{DTYPE_DCS_WRITE1, 1, 0, 0, 10,
 		sizeof(led_pwm3), led_pwm3},
 };
-
+*/
 static struct dsi_cmd_desc novatek_cmd_on_cmds[] = {
 	{DTYPE_DCS_WRITE, 1, 0, 0, 50,
 		sizeof(sw_reset), sw_reset},
@@ -394,8 +395,8 @@ static int mipi_novatek_lcd_on(struct platform_device *pdev)
 	mipi  = &mfd->panel_info.mipi;
 
 	if (mipi->mode == DSI_VIDEO_MODE) {
-		mipi_dsi_cmds_tx(&novatek_tx_buf, novatek_video_on_cmds,
-				ARRAY_SIZE(novatek_video_on_cmds));
+		//mipi_dsi_cmds_tx(&novatek_tx_buf, novatek_video_on_cmds,
+				//ARRAY_SIZE(novatek_video_on_cmds));
 	} else {
 		mipi_dsi_cmds_tx(&novatek_tx_buf, novatek_cmd_on_cmds,
 				ARRAY_SIZE(novatek_cmd_on_cmds));
