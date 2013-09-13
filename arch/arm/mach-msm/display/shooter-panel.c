@@ -32,8 +32,6 @@
 static int mipi_dsi_panel_power(const int on);
 static int __devinit shooter_lcd_probe(struct platform_device *pdev);
 static void shooter_lcd_shutdown(struct platform_device *pdev);
-static int shooter_lcd_on(struct platform_device *pdev);
-static int shooter_lcd_off(struct platform_device *pdev);
 static void shooter_set_backlight(struct msm_fb_data_type *mfd);
 static int mipi_shooter_device_register(const char* dev_name, struct msm_panel_info *pinfo, u32 channel, u32 panel);
 static int wled_trigger_initialized;
@@ -45,17 +43,6 @@ static int cur_bl_level = 0;
 static int mipi_lcd_on = 1;
 struct dcs_cmd_req cmdreq_shooter;
 static u32 manu_id;
-
-static char sw_reset[2] = {0x01, 0x00};
-static char enter_sleep[2] = {0x10, 0x00};
-static char exit_sleep[2] = {0x11, 0x00};
-static char display_off[2] = {0x28, 0x00};
-static char display_on[2] = {0x29, 0x00};
-static char enable_te[2] = {0x35, 0x00};
-static char test_reg[3] = {0x44, 0x01, 0x3f};
-static char max_pktsize[2] = {MIPI_DSI_MRPS, 0x00};
-
-static char set_twolane[2] = {0xae, 0x03}; /* DTYPE_DCS_WRITE1 */
 
 static struct pm_gpio pwm_gpio_config = {
 		.direction	= PM_GPIO_DIR_OUT,
@@ -108,8 +95,6 @@ static struct platform_driver this_driver = {
 };
 
 struct msm_fb_panel_data shooter_panel_data = {
-	.on		= shooter_lcd_on,
-	.off		= shooter_lcd_off,
 	.set_backlight  = shooter_set_backlight,
 };
 
@@ -118,71 +103,7 @@ static struct mipi_dsi_platform_data mipi_dsi_pdata = {
 	.dsi_power_save = mipi_dsi_panel_power,
 };
 
-static char set_width[5] = {0x2A, 0x00, 0x00, 0x02, 0x1B};
-static char set_height[5] = {0x2B, 0x00, 0x00, 0x03, 0xBF};
-static char rgb_888[2] = {0x3A, 0x77};
 
-static char novatek_pwm_f3[2] = {0xF3, 0xAA };
-static char novatek_pwm_00[2] = {0x00, 0x01 };
-static char novatek_pwm_21[2] = {0x21, 0x20 };
-static char novatek_pwm_22[2] = {0x22, 0x03 };
-static char novatek_pwm_7d[2] = {0x7D, 0x01 };
-static char novatek_pwm_7f[2] = {0x7F, 0xAA };
-
-static char novatek_pwm_cp[2] = {0x09, 0x34 };
-static char novatek_pwm_cp2[2] = {0xc9, 0x01 };
-static char novatek_pwm_cp3[2] = {0xff, 0xaa };
-
-static struct dsi_cmd_desc shr_sharp_cmd_on_cmds[] = {
-	{DTYPE_DCS_WRITE, 1, 0, 0, 10,
-		sizeof(sw_reset), sw_reset},
-	{DTYPE_DCS_WRITE, 1, 0, 0, 120,
-		sizeof(exit_sleep), exit_sleep},
-	{DTYPE_DCS_WRITE1, 1, 0, 0, 0,
-		sizeof(novatek_pwm_f3), novatek_pwm_f3},
-	{DTYPE_DCS_WRITE1, 1, 0, 0, 0,
-		sizeof(novatek_pwm_00), novatek_pwm_00},
-	{DTYPE_DCS_WRITE1, 1, 0, 0, 0,
-		sizeof(novatek_pwm_21), novatek_pwm_21},
-	{DTYPE_DCS_WRITE1, 1, 0, 0, 0,
-		sizeof(novatek_pwm_22), novatek_pwm_22},
-	{DTYPE_DCS_WRITE1, 1, 0, 0, 0,
-		sizeof(novatek_pwm_7d), novatek_pwm_7d},
-	{DTYPE_DCS_WRITE1, 1, 0, 0, 0,
-		sizeof(novatek_pwm_7f), novatek_pwm_7f},
-	{DTYPE_DCS_WRITE1, 1, 0, 0, 0,
-		sizeof(novatek_pwm_f3), novatek_pwm_f3},
-	{DTYPE_DCS_WRITE1, 1, 0, 0, 0,
-		sizeof(novatek_pwm_cp), novatek_pwm_cp},
-	{DTYPE_DCS_WRITE1, 1, 0, 0, 0,
-		sizeof(novatek_pwm_cp2), novatek_pwm_cp2},
-	{DTYPE_DCS_WRITE1, 1, 0, 0, 0,
-		sizeof(novatek_pwm_cp3), novatek_pwm_cp3},
-	{DTYPE_DCS_WRITE1, 1, 0, 0, 0,
-		sizeof(enable_te), enable_te},
-	{DTYPE_DCS_LWRITE, 1, 0, 0, 0,
-		sizeof(test_reg), test_reg},
-	{DTYPE_MAX_PKTSIZE, 1, 0, 0, 0,
-		sizeof(max_pktsize), max_pktsize},
-	{DTYPE_DCS_WRITE1, 1, 0, 0, 0,
-		sizeof(set_twolane), set_twolane},
-	{DTYPE_DCS_LWRITE, 1, 0, 0, 0,
-		sizeof(set_width), set_width},
-	{DTYPE_DCS_LWRITE, 1, 0, 0, 0,
-		sizeof(set_height), set_height},
-	{DTYPE_DCS_WRITE1, 1, 0, 0, 0,
-		sizeof(rgb_888), rgb_888},
-	{DTYPE_DCS_WRITE, 1, 0, 0, 0,
-		sizeof(display_on), display_on},
-
-};
-
-static struct dsi_cmd_desc shr_sharp_display_off_cmds[] = {
-	{DTYPE_DCS_WRITE, 1, 0, 0, 0,
-		sizeof(display_off), display_off},
-	{DTYPE_DCS_WRITE, 1, 0, 0, 110,
-		sizeof(enter_sleep), enter_sleep}
-};
 
 static char manufacture_id[2] = {0x04, 0x00}; 
 
@@ -334,61 +255,6 @@ static inline void shooter_mipi_dsi_set_backlight(struct msm_fb_data_type *mfd)
 	cmdreq_shooter.cb = NULL;
 
 	return;
-}
-
-static int shooter_lcd_on(struct platform_device *pdev)
-{
-	struct msm_fb_data_type *mfd;
-	struct mipi_panel_info *mipi;
-
-	mfd = platform_get_drvdata(pdev);
-	if (!mfd)
-		return -ENODEV;
-	if (mfd->key != MFD_KEY)
-		return -EINVAL;
-
-	mipi  = &mfd->panel_info.mipi;
-
-	if (mipi->mode == DSI_VIDEO_MODE) {		
-		PR_DISP_ERR("%s: not support DSI_VIDEO_MODE!(%d)", __func__, mipi->mode);
-	} else {
-		mipi_dsi_cmd_bta_sw_trigger(); 
-		cmdreq_shooter.cmds = shr_sharp_cmd_on_cmds;
-		cmdreq_shooter.cmds_cnt = ARRAY_SIZE(shr_sharp_cmd_on_cmds);
-		cmdreq_shooter.flags = CMD_REQ_COMMIT;
-		cmdreq_shooter.rlen = 0;
-		cmdreq_shooter.cb = NULL;
-		mipi_dsi_cmdlist_put(&cmdreq_shooter);
-		mipi_dsi_cmd_bta_sw_trigger(); 
-		mipi_shooter_manufacture_id(mfd);
-	}
-
-	mipi_lcd_on = 1;
-	cur_bl_level = 0;
-	return 0;
-}
-
-static int shooter_lcd_off(struct platform_device *pdev)
-{
-	struct msm_fb_data_type *mfd;
-
-	mfd = platform_get_drvdata(pdev);
-
-	if (!mfd)
-		return -ENODEV;
-	if (mfd->key != MFD_KEY)
-		return -EINVAL;
-	if (!mipi_lcd_on)
-		return 0;
-
-	cmdreq_shooter.cmds = shr_sharp_display_off_cmds;
-	cmdreq_shooter.cmds_cnt = ARRAY_SIZE(shr_sharp_display_off_cmds);
-	cmdreq_shooter.flags = CMD_REQ_COMMIT;
-	cmdreq_shooter.rlen = 0;
-	cmdreq_shooter.cb = NULL;
-	mipi_dsi_cmdlist_put(&cmdreq_shooter);
-	mipi_lcd_on = 0;
-	return 0;
 }
 
 static void shooter_set_backlight(struct msm_fb_data_type *mfd)
