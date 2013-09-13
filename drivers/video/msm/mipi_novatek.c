@@ -219,7 +219,7 @@ static char sw_reset[2] = {0x01, 0x00}; /* DTYPE_DCS_WRITE */
 static char enter_sleep[2] = {0x10, 0x00}; /* DTYPE_DCS_WRITE */
 static char exit_sleep[2] = {0x11, 0x00}; /* DTYPE_DCS_WRITE */
 static char display_off[2] = {0x28, 0x00}; /* DTYPE_DCS_WRITE */
-static char display_on[2] = {0x29, 0x00}; /* DTYPE_DCS_WRITE */
+//static char display_on[2] = {0x29, 0x00}; /* DTYPE_DCS_WRITE */
 static char test_reg_qhd[3] = {0x44, 0x01, 0x3f};/* DTYPE_DCS_LWRITE */ /* 479:1b7; 319:13f; 479:1df */
 static char enable_te[2] = {0x35, 0x00};/* DTYPE_DCS_WRITE1 */
 
@@ -456,7 +456,7 @@ static int mipi_novatek_lcd_off(struct platform_device *pdev)
 DEFINE_LED_TRIGGER(bkl_led_trigger);
 
 static struct dsi_cmd_desc backlight_cmd = {
-	DTYPE_DCS_LWRITE, 1, 0, 0, 1, sizeof(led_pwm1), led_pwm1};
+	DTYPE_DCS_LWRITE, 1, 0, 0, 0, sizeof(led_pwm1), led_pwm1};
 
 struct dcs_cmd_req cmdreq;
 
