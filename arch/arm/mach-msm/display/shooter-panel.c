@@ -94,9 +94,7 @@ static struct platform_driver this_driver = {
 	.shutdown = shooter_lcd_shutdown,
 };
 
-struct msm_fb_panel_data shooter_panel_data = {
-	.set_backlight  = shooter_set_backlight,
-};
+static struct msm_fb_panel_data shooter_panel_data;
 
 static struct mipi_dsi_platform_data mipi_dsi_pdata = {
 	.vsync_gpio 	= GPIO_LCD_TE,
@@ -165,13 +163,17 @@ static unsigned char shooter_shrink_pwm(int val)
 }
 
 static struct mipi_dsi_phy_ctrl dsi_cmd_mode_phy_db = {
-	{0x03, 0x01, 0x01, 0x00},		
-	{0xB4, 0x8D, 0x1D, 0x00, 0x20, 0x94, 0x20,
-	0x8F, 0x20, 0x03, 0x04},
-	{0x7f, 0x00, 0x00, 0x00},	
-	{0xee, 0x02, 0x86, 0x00},		
-	{0x40, 0xf9, 0xb0, 0xda, 0x00, 0x50, 0x48, 0x63, 0x30, 0x07, 0x03,
-	0x05, 0x14, 0x03, 0x0, 0x0, 0x54, 0x06, 0x10, 0x04, 0x0},
+/* DSI_BIT_CLK at 482MHz, 2 lane, RGB888 */
+	{0x03, 0x01, 0x01, 0x00},	/* regulator */
+	/* timing   */
+	{0x96, 0x1E, 0x1E, 0x00, 0x3C, 0x3C, 0x1E, 0x28,
+	0x0b, 0x13, 0x04},
+	{0x7f, 0x00, 0x00, 0x00},	/* phy ctrl */
+	{0xee, 0x02, 0x86, 0x00},	/* strength */
+	/* pll control */
+	{0x41, 0x9c, 0xb9, 0xd6, 0x00, 0x50, 0x48, 0x63,
+	0x01, 0x0f, 0x07,
+	0x05, 0x14, 0x03, 0x03, 0x03, 0x54, 0x06, 0x10, 0x04, 0x03 },
 };
 
 static int __init shooter_shooter_blue_qhd_pt_init(void)
@@ -184,23 +186,23 @@ static int __init shooter_shooter_blue_qhd_pt_init(void)
 	pinfo.pdest = DISPLAY_1;
 	pinfo.wait_cycle = 0;
 	pinfo.bpp = 24;
-	pinfo.lcdc.h_back_porch = 50;
-	pinfo.lcdc.h_front_porch = 50;
-	pinfo.lcdc.h_pulse_width = 20;
-	pinfo.lcdc.v_back_porch = 11;
-	pinfo.lcdc.v_front_porch = 10;
-	pinfo.lcdc.v_pulse_width = 5;
+	pinfo.lcdc.h_back_porch = 64;
+	pinfo.lcdc.h_front_porch = 96;
+	pinfo.lcdc.h_pulse_width = 32;
+	pinfo.lcdc.v_back_porch = 16;
+	pinfo.lcdc.v_front_porch = 16;
+	pinfo.lcdc.v_pulse_width = 4;
 	pinfo.lcdc.border_clr = 0;	
 	pinfo.lcdc.underflow_clr = 0xff;	
 	pinfo.lcdc.hsync_skew = 0;
 	pinfo.bl_max = 255;
 	pinfo.bl_min = 1;
 	pinfo.fb_num = 2;
-	pinfo.clk_rate = 454000000;
+	pinfo.clk_rate = 482000000;
 	pinfo.is_3d_panel = FB_TYPE_3D_PANEL;
 	pinfo.lcd.vsync_enable = TRUE;
 	pinfo.lcd.hw_vsync_mode = TRUE;
-	pinfo.lcd.refx100 = 6000; 
+	pinfo.lcd.refx100 = 6096; 
 	pinfo.lcd.v_back_porch = 11;
 	pinfo.lcd.v_front_porch = 10;
 	pinfo.lcd.v_pulse_width = 5;
@@ -211,10 +213,10 @@ static int __init shooter_shooter_blue_qhd_pt_init(void)
 	pinfo.mipi.data_lane0 = TRUE;
 	pinfo.mipi.esc_byte_ratio = 4;
 	pinfo.mipi.data_lane1 = TRUE;
-	pinfo.mipi.t_clk_post = 0x22;
-	pinfo.mipi.t_clk_pre = 0x3f;
+	pinfo.mipi.t_clk_post = 0x0a;
+	pinfo.mipi.t_clk_pre = 0x1e;
 	pinfo.mipi.stream = 0;	
-	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_NONE;
+	pinfo.mipi.mdp_trigger = DSI_CMD_TRIGGER_SW;
 	pinfo.mipi.dma_trigger = DSI_CMD_TRIGGER_SW;
 	pinfo.mipi.te_sel = 1; 
 	pinfo.mipi.interleave_max = 1;
@@ -222,7 +224,7 @@ static int __init shooter_shooter_blue_qhd_pt_init(void)
 	pinfo.mipi.wr_mem_continue = 0x3c;
 	pinfo.mipi.wr_mem_start = 0x2c;
 	pinfo.mipi.dsi_phy_db = &dsi_cmd_mode_phy_db;
-
+	
 	ret = mipi_shooter_device_register("mipi_video_novatek_qhd", &pinfo, MIPI_DSI_PRIM,
 						MIPI_DSI_PANEL_QHD_PT);
 	if (ret)
@@ -419,9 +421,10 @@ static int mipi_dsi_panel_power(const int on)
 
 static int __init shooter_panel_init(void)
 {
-	if(panel_type != PANEL_ID_NONE)
+	if(panel_type != PANEL_ID_NONE) {
+		shooter_shooter_blue_qhd_pt_init();
 		msm_fb_register_device("mipi_dsi", &mipi_dsi_pdata);
-	else
+	} else
 		printk(KERN_INFO "[DISP]panel ID= NONE\n");
 
 	return 0;
@@ -437,7 +440,7 @@ static int __init shooter_panel_late_init(void)
 	mipi_dsi_buf_alloc(&panel_rx_buf, DSI_BUF_SIZE);
 
 	if (panel_type == PANEL_ID_SHR_SHARP_NT) {
-		PR_DISP_INFO("%s: panel ID = PANEL_ID_PYD_SHARP\n", __func__);
+		PR_DISP_INFO("%s: panel ID = PANEL_ID_SHR_SHARP_NT\n", __func__);
 		shooter_shooter_blue_qhd_pt_init();
 	}
 
