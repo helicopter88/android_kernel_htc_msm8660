@@ -62,7 +62,7 @@ static inline int pm8058_mpp_config(unsigned mpp, unsigned type,
 }
 #endif
 
-#ifdef CONFIG_PMIC8901
+#ifdef CONFIG_MPP_PMIC8901
 int pm8901_mpp_config(unsigned mpp, unsigned type, unsigned level,
 		      unsigned control);
 #else
