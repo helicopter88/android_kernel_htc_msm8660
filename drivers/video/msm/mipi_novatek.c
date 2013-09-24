@@ -421,15 +421,13 @@ static int mipi_novatek_lcd_on(struct platform_device *pdev)
 
 	mipi  = &mfd->panel_info.mipi;
 
-	if (mipi->mode == DSI_VIDEO_MODE) {
-	} else {
+	if (mipi->mode == DSI_CMD_MODE) {
 		mipi_dsi_cmds_tx(&novatek_tx_buf, novatek_cmd_on_cmds,
 				ARRAY_SIZE(novatek_cmd_on_cmds));
-
+	}
 		/* clean up ack_err_status */
 		mipi_dsi_cmd_bta_sw_trigger();
 		mipi_novatek_manufacture_id(mfd);
-	}
 
 	return 0;
 }
