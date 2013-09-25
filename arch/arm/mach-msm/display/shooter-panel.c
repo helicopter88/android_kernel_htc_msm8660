@@ -422,7 +422,6 @@ static int mipi_dsi_panel_power(const int on)
 static int __init shooter_panel_init(void)
 {
 	if(panel_type != PANEL_ID_NONE) {
-		shooter_shooter_blue_qhd_pt_init();
 		msm_fb_register_device("mipi_dsi", &mipi_dsi_pdata);
 	} else
 		printk(KERN_INFO "[DISP]panel ID= NONE\n");
